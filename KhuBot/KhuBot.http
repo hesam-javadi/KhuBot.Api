@@ -1,0 +1,6 @@
+@KhuBot_HostAddress = http://localhost:5274
+
+GET {{KhuBot_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
