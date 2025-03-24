@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KhuBot", "KhuBot\KhuBot.csproj", "{91AB9812-ADE0-4A9E-B93D-15F17D8D420D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KhuBot.Api", "KhuBot.Api\KhuBot.Api.csproj", "{91AB9812-ADE0-4A9E-B93D-15F17D8D420D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KhuBot.Application", "KhuBot.Application\KhuBot.Application.csproj", "{E624DDF4-9C8F-4035-9B35-DA093FE0F0A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KhuBot.Domain", "KhuBot.Domain\KhuBot.Domain.csproj", "{05173630-4B12-4B7C-A5E3-B96EE1BF63F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KhuBot.Infrastructure", "KhuBot.Infrastructure\KhuBot.Infrastructure.csproj", "{C9D4BBDE-4048-4B81-B217-F6FDD4D8DC6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{91AB9812-ADE0-4A9E-B93D-15F17D8D420D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91AB9812-ADE0-4A9E-B93D-15F17D8D420D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91AB9812-ADE0-4A9E-B93D-15F17D8D420D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E624DDF4-9C8F-4035-9B35-DA093FE0F0A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E624DDF4-9C8F-4035-9B35-DA093FE0F0A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E624DDF4-9C8F-4035-9B35-DA093FE0F0A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E624DDF4-9C8F-4035-9B35-DA093FE0F0A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05173630-4B12-4B7C-A5E3-B96EE1BF63F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05173630-4B12-4B7C-A5E3-B96EE1BF63F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05173630-4B12-4B7C-A5E3-B96EE1BF63F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05173630-4B12-4B7C-A5E3-B96EE1BF63F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9D4BBDE-4048-4B81-B217-F6FDD4D8DC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9D4BBDE-4048-4B81-B217-F6FDD4D8DC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9D4BBDE-4048-4B81-B217-F6FDD4D8DC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9D4BBDE-4048-4B81-B217-F6FDD4D8DC6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
