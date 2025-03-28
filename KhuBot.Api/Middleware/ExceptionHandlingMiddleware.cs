@@ -32,7 +32,7 @@ namespace KhuBot.Api.Middleware
                 [
                     new()
                     {
-                        ErrorMessage = "خطای فنی رخ داده است! لطفا پس از چند دقیقه دوباره تلاش نمایید.",
+                        ErrorMessage = "احتمالا یه مشکل فنی داریم! لطفا پس از چند دقیقه دوباره تلاش کن و اگر اوکی نشد کدشو گزارش کن بهمون.",
                         ErrorId = errorCode,
                         IsInternalError = true
                     }

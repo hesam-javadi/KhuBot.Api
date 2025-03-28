@@ -1,27 +1,96 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using KhuBot.Application.IRepositories;
 using KhuBot.Application.IServices;
 using KhuBot.Domain.DTOs;
 using KhuBot.Domain.Entities;
+using KhuBot.Domain.Exceptions;
+using KhuBot.Domain.Utilities;
 
 namespace KhuBot.Application.Services
 {
-    public class ChatServices(IBaseRepository<User> userRepository,
+    public class ChatServices(
+        IBaseRepository<User> userRepository,
         IBaseRepository<ChatMessage> chatMessageRepository,
         IChatBotRepository chatBotRepository) : IChatServices
     {
-        public Task<DataResponseDto<string>> SendMessageAsync(string message, int userId)
+        public async Task<DataResponseDto<string>> SendMessageAsync(SendMessageRequestDto request, string rawDeveloperInstruction, int userId)
         {
-            throw new NotImplementedException();
+            var beforeResponseDate = DateTime.Now;
+
+            var user = (await userRepository.FindAsync(u => u.Id == userId))!;
+
+            var usagePercent = 100;
+            if (user.TokenLimit != 0)
+            {
+                usagePercent = (int)Math.Floor((double)user.TokenUsage / user.TokenLimit * 100);
+                if (usagePercent > 100)
+                    usagePercent = 100;
+            }
+
+            if (usagePercent == 100)
+                throw new StatusCodeException([
+                    new ErrorResponseDetailDto
+                    {
+                        ErrorId = null,
+                        ErrorKey = null,
+                        ErrorMessage = "متاسفانه اشتراکت تموم شد :(\nاگر از این نرم افزار راضی بودی خوشحال میشم نظرتو توی تلگرام باهام درمیون بزاری تا اشتراکتو بازم شارژ کنم :)",
+                        IsInternalError = false
+                    }
+                ], HttpStatusCode.PaymentRequired);
+
+            var formattedDeveloperInstruction =
+                rawDeveloperInstruction.FormatTemplate(user.FirstName, user.LastName, usagePercent.ToString());
+
+            var response = await chatBotRepository.GetResponseAsync(request.Message, formattedDeveloperInstruction);
+
+            user.TokenUsage += response.TokenUsage;
+            await userRepository.UpdateAsync(user);
+
+            await chatMessageRepository.CreateAsync(new ChatMessage
+            {
+                UserId = userId,
+                Content = request.Message,
+                IsFromBot = false,
+                TimeStamp = beforeResponseDate
+            });
+
+            await chatMessageRepository.CreateAsync(new ChatMessage
+            {
+                UserId = userId,
+                Content = response.Content,
+                IsFromBot = true,
+                TimeStamp = DateTime.Now
+            });
+
+            return new DataResponseDto<string>(response.Content);
         }
 
-        public Task<DataResponseDto<ChatListResponseDto>> GetChatListAsync(int userId)
+        public async Task<DataResponseDto<ChatListResponseDto>> GetChatListAsync(int userId)
         {
-            throw new NotImplementedException();
+            var user = (await userRepository.FindAsync(u => u.Id == userId, u => u.ChatMessages))!;
+
+            var usagePercent = 100;
+            if (user.TokenLimit != 0)
+            {
+                usagePercent = (int)Math.Floor((double)user.TokenUsage / user.TokenLimit * 100);
+                if (usagePercent > 100)
+                    usagePercent = 100;
+            }
+
+            return new DataResponseDto<ChatListResponseDto>(new ChatListResponseDto
+            {
+                Messages = user.ChatMessages.Select(cm => new MessageDto
+                {
+                    Content = cm.Content,
+                    IsFromBot = cm.IsFromBot
+                }).ToList(),
+                UsagePercent = usagePercent
+            });
         }
     }
 }

@@ -9,7 +9,7 @@ namespace KhuBot.Application.IServices
 {
     public interface IChatServices
     {
-        Task<DataResponseDto<string>> SendMessageAsync(string message, int userId);
+        Task<DataResponseDto<string>> SendMessageAsync(SendMessageRequestDto request, string rawDeveloperInstruction, int userId);
 
         Task<DataResponseDto<ChatListResponseDto>> GetChatListAsync(int userId);
     }

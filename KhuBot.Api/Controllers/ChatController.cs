@@ -20,10 +20,12 @@ namespace KhuBot.Api.Controllers
         [ProducesResponseType(typeof(DataResponseDto<string>), 200)]
         [UserAuthorize]
         public async Task<IActionResult> SendMessage(
-            [FromBody, Required(ErrorMessage = "پیام الزامی است.")] string message)
+            [FromBody] SendMessageRequestDto request)
         {
             var userId = Convert.ToInt32(User.FindFirstValue("userId")!);
-            return Ok(await chatServices.SendMessageAsync(message, userId));
+            var rawDeveloperInstruction = await System.IO.File.ReadAllTextAsync(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DeveloperInstruction.txt"));
+            return Ok(await chatServices.SendMessageAsync(request, rawDeveloperInstruction, userId));
         }
 
         // GET: api/Chat/GetChatList

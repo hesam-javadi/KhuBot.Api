@@ -1,3 +1,4 @@
+﻿using System.Net;
 using DotNetEnv;
 using KhuBot.Api.Extensions;
 using KhuBot.Infrastructure.Extensions;
@@ -8,9 +9,18 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using KhuBot.Api.Middleware;
 using KhuBot.Application.Attributes;
+using KhuBot.Domain.DTOs;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.ChatCompletion;
+using System.Security.Claims;
+using KhuBot.Domain.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +37,62 @@ builder.Services.AddCors(options =>
 });
 
 Env.Load();
+
+#pragma warning disable SKEXP0010 // Suppress experimental warning
+builder.Services.AddOpenAIChatCompletion(
+    modelId: "deepseek-chat",
+    apiKey: Environment.GetEnvironmentVariable("DEEPSEEK_API_KEY")!,
+    endpoint: new Uri("https://api.deepseek.com"));
+#pragma warning restore SKEXP0010
+
+// Add rate limiting with custom partition key
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.FindFirstValue("userId") ??
+                          httpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 10,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+    // IP-based limit for login
+    options.AddPolicy("loginIpLimit", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Request.Headers.Host.ToString(),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 10,
+                QueueLimit = 0,
+                Window = TimeSpan.FromHours(1)
+            }));
+
+    // Configure global rejection response
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = (context, token) => throw new StatusCodeException([
+        new ErrorResponseDetailDto
+        {
+            ErrorId = null,
+            ErrorKey = null,
+            ErrorMessage = "خیلی درخواستات زیاد شد :> یه نفسی بگیر بعد از چند دقیقه دوباره تلاش کن.",
+            IsInternalError = false
+        }
+    ], HttpStatusCode.TooManyRequests);
+});
+/*context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponseDto([
+                new ErrorResponseDetailDto
+                {
+                    ErrorId = null,
+                    ErrorKey = null,
+                    ErrorMessage = "خیلی درخواستات زیاد شد :> یه نفسی بگیر بعد از چند دقیقه دوباره تلاش کن.",
+                    IsInternalError = false
+                }
+            ])), token);*/
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -116,6 +182,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseRateLimiter();
 
 app.UseHttpsRedirection();
 

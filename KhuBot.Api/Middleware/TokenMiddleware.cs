@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using KhuBot.Application.IRepositories;
 using KhuBot.Domain.Entities;
+using KhuBot.Domain.Utilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -49,7 +50,7 @@ namespace KhuBot.Api.Middleware
                     [
                         new Claim("userId", "0")
                     ];
-                    var newToken = GenerateJwtToken(claims, DateTime.Now.AddDays(-1));
+                    var newToken = Utilities.GenerateJwtToken(claims, DateTime.Now.AddDays(-1));
                     context.Request.Headers["Authorization"] = "Bearer " + newToken;
                 }
                 else
@@ -58,7 +59,7 @@ namespace KhuBot.Api.Middleware
                     [
                         new Claim("userId", userId.ToString())
                     ];
-                    var newToken = GenerateJwtToken(claims, jwtToken.ValidTo);
+                    var newToken = Utilities.GenerateJwtToken(claims, jwtToken.ValidTo);
                     context.Request.Headers["Authorization"] = "Bearer " + newToken;
                 }
                 var identity = new ClaimsIdentity(claims, "Bearer");
@@ -70,29 +71,11 @@ namespace KhuBot.Api.Middleware
                 {
                     new Claim("userId", "0")
                 };
-                var newToken = GenerateJwtToken(claims, DateTime.Now.AddDays(-1));
+                var newToken = Utilities.GenerateJwtToken(claims, DateTime.Now.AddDays(-1));
                 context.Request.Headers["Authorization"] = "Bearer " + newToken;
                 var identity = new ClaimsIdentity(claims, "Bearer");
                 context.User = new ClaimsPrincipal(identity);
             }
-        }
-
-        private string GenerateJwtToken(List<Claim> claims, DateTime tokenExpirationDateTime)
-        {
-            var jwtIssuer = "KhuBot";
-            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")!;
-
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var sectoken = new JwtSecurityToken(jwtIssuer,
-                jwtIssuer,
-                claims,
-                expires: tokenExpirationDateTime,
-                signingCredentials: credentials);
-
-            var token = new JwtSecurityTokenHandler().WriteToken(sectoken);
-            return token;
         }
     }
 }
