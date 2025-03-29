@@ -46,8 +46,7 @@ namespace KhuBot.UnitTest.Services
                 TokenLimit = 100,
                 ChatMessages =
                 [
-                    new ChatMessage { Id = 1, UserId = userId, Content = "Hello", IsFromBot = false },
-                    new ChatMessage { Id = 2, UserId = userId, Content = "Hi there!", IsFromBot = true }
+                    new ChatMessage { Id = 1, UserId = userId, Message = "Hello", Response = "Hi there!" }
                 ]
             };
 
@@ -162,7 +161,8 @@ namespace KhuBot.UnitTest.Services
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await _chatServices.SendMessageAsync(message, "Something", userId);
+            var result = await _chatServices.SendMessageAsync(new SendMessageRequestDto { Message = message },
+                "Something", userId);
 
             // Assert
             result.Should().NotBeNull();
@@ -192,7 +192,9 @@ namespace KhuBot.UnitTest.Services
                 .ReturnsAsync(user);
 
             // Act
-            Func<Task> act = async () => await _chatServices.SendMessageAsync(message, "Something", userId);
+            Func<Task> act = async () =>
+                await _chatServices.SendMessageAsync(new SendMessageRequestDto { Message = message }, "Something",
+                    userId);
 
             // Assert
             var thrownException = await act.Should().ThrowAsync<StatusCodeException>();

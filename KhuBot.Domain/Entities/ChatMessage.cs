@@ -16,11 +16,14 @@ namespace KhuBot.Domain.Entities
         [ForeignKey(nameof(this.User))]
         public int UserId { get; set; }
 
-        public string Content { get; set; } = null!;
+        public string Message { get; set; } = null!;
 
-        public DateTime TimeStamp { get; set; }
+        public string Response { get; set; } = null!;
 
-        public bool IsFromBot { get; set; }
+        public DateTime MessageTimeStamp { get; set; }
+
+        public DateTime ResponseTimeStamp { get; set; }
+        
 
         #region Relations
 

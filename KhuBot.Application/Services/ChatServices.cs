@@ -54,17 +54,10 @@ namespace KhuBot.Application.Services
             await chatMessageRepository.CreateAsync(new ChatMessage
             {
                 UserId = userId,
-                Content = request.Message,
-                IsFromBot = false,
-                TimeStamp = beforeResponseDate
-            });
-
-            await chatMessageRepository.CreateAsync(new ChatMessage
-            {
-                UserId = userId,
-                Content = response.Content,
-                IsFromBot = true,
-                TimeStamp = DateTime.Now
+                Message = request.Message,
+                MessageTimeStamp = beforeResponseDate,
+                Response = response.Content,
+                ResponseTimeStamp = DateTime.Now
             });
 
             return new DataResponseDto<string>(response.Content);
@@ -82,13 +75,26 @@ namespace KhuBot.Application.Services
                     usagePercent = 100;
             }
 
+            var chatMessageVms = new List<MessageDto>();
+
+            foreach (var chatMessage in user.ChatMessages)
+            {
+                chatMessageVms.Add(new MessageDto
+                {
+                    Content = chatMessage.Message,
+                    IsFromBot = false
+                });
+
+                chatMessageVms.Add(new MessageDto
+                {
+                    Content = chatMessage.Response,
+                    IsFromBot = true
+                });
+            }
+
             return new DataResponseDto<ChatListResponseDto>(new ChatListResponseDto
             {
-                Messages = user.ChatMessages.Select(cm => new MessageDto
-                {
-                    Content = cm.Content,
-                    IsFromBot = cm.IsFromBot
-                }).ToList(),
+                Messages = chatMessageVms,
                 UsagePercent = usagePercent
             });
         }
