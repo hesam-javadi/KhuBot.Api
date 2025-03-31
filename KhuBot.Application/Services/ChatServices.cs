@@ -15,7 +15,7 @@ namespace KhuBot.Application.Services
 {
     public class ChatServices(
         IBaseRepository<User> userRepository,
-        IBaseRepository<ChatMessage> chatMessageRepository,
+        IChatMessageRepository chatMessageRepository,
         IChatBotRepository chatBotRepository) : IChatServices
     {
         public async Task<DataResponseDto<string>> SendMessageAsync(SendMessageRequestDto request, string rawDeveloperInstruction, int userId)
@@ -46,7 +46,24 @@ namespace KhuBot.Application.Services
             var formattedDeveloperInstruction =
                 rawDeveloperInstruction.FormatTemplate(user.FirstName, user.LastName, usagePercent.ToString());
 
-            var response = await chatBotRepository.GetResponseAsync(request.Message, formattedDeveloperInstruction);
+            List<BotChatHistory> chatHistory = (await chatMessageRepository.GetLastNMessagesAsync(userId, 3))
+                .SelectMany(c => new List<BotChatHistory>
+                {
+                    new()
+                    {
+                        Message = c.Message,
+                        IsFromBot = false
+                    },
+                    new()
+                    {
+                        Message = c.Response,
+                        IsFromBot = true
+                    }
+                })
+                .ToList();
+
+            var response =
+                await chatBotRepository.GetResponseAsync(request.Message, formattedDeveloperInstruction, chatHistory);
 
             user.TokenUsage += response.TokenUsage;
             await userRepository.UpdateAsync(user);
@@ -95,7 +112,9 @@ namespace KhuBot.Application.Services
             return new DataResponseDto<ChatListResponseDto>(new ChatListResponseDto
             {
                 Messages = chatMessageVms,
-                UsagePercent = usagePercent
+                UsagePercent = usagePercent,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
             });
         }
     }

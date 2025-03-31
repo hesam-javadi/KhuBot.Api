@@ -7,8 +7,8 @@ using KhuBot.Domain.Entities;
 
 namespace KhuBot.Application.IRepositories
 {
-    public interface IChatBotRepository
+    public interface IChatMessageRepository : IBaseRepository<ChatMessage>
     {
-        Task<BotResponse> GetResponseAsync(string message, string developerInstruction, List<BotChatHistory> histories);
+        Task<List<ChatMessage>> GetLastNMessagesAsync(int userId, int n);
     }
 }

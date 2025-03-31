@@ -24,7 +24,7 @@ namespace KhuBot.Api.Middleware
             }
             catch (Exception ex)
             {
-                var errorCode = Guid.NewGuid().ToString().Replace("-", "");
+                var errorCode = Random.Shared.Next(100000, 999999).ToString();
                 logger.LogError(ex, errorCode);
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 context.Response.ContentType = "application/json";
@@ -32,7 +32,7 @@ namespace KhuBot.Api.Middleware
                 [
                     new()
                     {
-                        ErrorMessage = "احتمالا یه مشکل فنی داریم! لطفا پس از چند دقیقه دوباره تلاش کن و اگر اوکی نشد کدشو گزارش کن بهمون.",
+                        ErrorMessage = $"احتمالا یه مشکل فنی داریم! لطفا پس از چند دقیقه دوباره تلاش کن و اگر اوکی نشد کدشو گزارش کن بهمون. کدش: {errorCode}",
                         ErrorId = errorCode,
                         IsInternalError = true
                     }

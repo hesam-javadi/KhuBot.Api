@@ -83,16 +83,6 @@ builder.Services.AddRateLimiter(options =>
         }
     ], HttpStatusCode.TooManyRequests);
 });
-/*context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        await context.HttpContext.Response.WriteAsync(JsonSerializer.Serialize(new ErrorResponseDto([
-                new ErrorResponseDetailDto
-                {
-                    ErrorId = null,
-                    ErrorKey = null,
-                    ErrorMessage = "خیلی درخواستات زیاد شد :> یه نفسی بگیر بعد از چند دقیقه دوباره تلاش کن.",
-                    IsInternalError = false
-                }
-            ])), token);*/
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -183,7 +173,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.UseRateLimiter();
+//app.UseRateLimiter();
 
 app.UseHttpsRedirection();
 

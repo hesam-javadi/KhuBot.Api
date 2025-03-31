@@ -22,6 +22,8 @@ namespace KhuBot.Api.Extensions
 
             services.AddScoped<IChatBotRepository, DeepSeekChatBotRepository>();
 
+            services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
             #endregion
